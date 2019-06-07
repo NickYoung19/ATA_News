@@ -1,6 +1,7 @@
 import logging
 from redis import StrictRedis
 
+
 class Config(object):
     SECRET_KEY = '123456789'
     SQLALCHEMY_DATABASE_URI = "mysql://root:mysql:127.0.0.1:3306/information_zzpython12"
