@@ -5,28 +5,8 @@ from flask_wtf import CSRFProtect
 from flask_session import Session
 from flask_migrate import MigrateCommand, Migrate
 from flask_script import Manager
+from config import Config
 
-
-class Config(object):
-    SECRET_KEY = '123456789'
-    DEGUB = True
-    SQLALCHEMY_DATABASE_URI = "mysql://root:mysql:127.0.0.1:3306/information_zzpython12"
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-
-    # Define two class properties to support dynamic modification
-    REDIS_HOST = "127.0.0.1"
-    REDIS_PORT = 6379
-
-    # Specifies session stored mode
-    SESSION_TYPE = 'redis'
-    # Specifies session stored object
-    SESSION_REDIS = StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
-    # Set session signature and make it confidential
-    SESSION_USER_SINGER = True
-    # Cancel permanent save
-    SESSION_PERMANT = False
-    # Set session's lifetime
-    PERMANENT_SESSION_LIFETIME = 86400 * 2
 
 app = Flask(__name__)
 
