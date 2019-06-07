@@ -25,7 +25,7 @@ class Config(object):
 
 class DevelopConfig(Config):
     """Development environment configuration"""
-    DEGUB = True
+    DEBUG = True
     LOG_LEVEL = logging.DEBUG
 
 
