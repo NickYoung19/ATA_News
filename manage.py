@@ -13,13 +13,6 @@ Migrate(app, db)
 manager.add_command('db', MigrateCommand)
 
 
-@app.route('/')
-def index():
-    # It proves that the session has been integrated already
-    # redis_store.session = ['name', 'miaomiao']
-    return 'success'
-
-
 if __name__ == '__main__':
     # app.run()
     manager.run()

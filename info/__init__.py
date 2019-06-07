@@ -27,6 +27,7 @@ def set_log(config_name):
     # Using global logging
     logging.getLogger().addHandler(file_log_handler)
 
+
 redis_store = None
 
 
@@ -56,5 +57,10 @@ def create_app(config_name):
 
     # Integrated flask_session app
     Session(app)
+
+    # Registration blueprint
+    # ps: When to use when to import, can solve the loop import issue
+    from info.modules.index import index_blu
+    app.register_blueprint(index_blu)
     # The factory function returns the created program instance
     return app
