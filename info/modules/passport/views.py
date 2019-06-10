@@ -183,17 +183,17 @@ def login():
     if not user.check_passowrd(passport):
         return jsonify(errno=RET.PWDERR, errmsg="密码输入错误")
 
+    # Set user last login datetime
+    user.last_login = datetime.now()
+
+    # Save user login status
+    session['user_id'] = user.id
+
     try:
         db.session.commit()
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
-
-    # Set user last login datetime
-    user.last_login = datetime.now()
-
-    # Save user login status
-    session['user_id'] = user.id
 
     return jsonify(errno=RET.OK, errmsg="登录成功")
