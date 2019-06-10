@@ -197,3 +197,14 @@ def login():
         return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
 
     return jsonify(errno=RET.OK, errmsg="登录成功")
+
+
+@passport_blu.route('/logout')
+def logout():
+    """
+    Realizes logout function by delete session
+    :return:
+    """
+    session.pop("user_id", None)
+
+    return jsonify(errno=RET.OK, errmsg="退出成功")
