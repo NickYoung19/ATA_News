@@ -1,5 +1,6 @@
 import random
 import re
+from datetime import datetime
 
 from flask import request, session
 from flask import current_app
@@ -149,3 +150,50 @@ def register():
     # Save user login status
     session['user_id'] = user.id
     return jsonify(errno=RET.OK, errmsg="注册成功")
+
+
+@passport_blu.route('/login')
+def login():
+    """
+    Realized user login function
+    :return:
+    """
+    # Receive parameters passed by the front end
+    params_dict = request.json
+    mobile = params_dict.get('mobile')
+    passport = params_dict.get('passport')
+
+    # Calibration receive params from front end
+    if not all([mobile, passport]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    if not re.match(r'1[356789]\d{9}', mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
+
+    try:
+        user = User.query.filter_by(mobile=mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
+
+    if not user:
+        return jsonify(errno=RET.NODATA, errmsg="用户没有注册")
+
+    # Calibration user input's password
+    if not user.check_passowrd(passport):
+        return jsonify(errno=RET.PWDERR, errmsg="密码输入错误")
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
+
+    # Set user last login datetime
+    user.last_login = datetime.now()
+
+    # Save user login status
+    session['user_id'] = user.id
+
+    return jsonify(errno=RET.OK, errmsg="登录成功")
