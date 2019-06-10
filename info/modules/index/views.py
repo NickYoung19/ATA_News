@@ -1,9 +1,13 @@
-from flask import render_template, session
+from flask import render_template
 from flask import current_app
+from flask import session
+from flask import request
+from flask import jsonify
 
 from info import redis_store, constants
 from info.models import User, News, Category
 from info.modules.index import index_blu
+from info.utils.response_code import RET
 
 
 @index_blu.route('/')
@@ -66,3 +70,50 @@ def favicon():
     :return:
     """
     return current_app.send_static_file('news/favicon.ico')
+
+
+@index_blu.route('/news_list')
+def news_list():
+    """
+    Realizes home page news list
+    :return:
+    """
+    cid = request.args.get('cid')
+    page = request.args.get('page', 1)
+    per_page = request.args.get('per_page', 10) # default: 10/page
+
+    # Calibration data
+    try:
+        cid = int(cid)
+        page = int(page)
+        per_page = int(per_page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg="参数错误")
+
+    # Search data by mysql
+    filters = []
+    if cid != 1:
+        filters.append(News.category_id == cid)
+
+    try:
+        paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page, per_page, False)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询错误")
+
+    news_list = paginate.items
+    current_page = paginate.page
+    total_page = paginate.pages
+
+    news_dict_li = []
+    for news in news_list:
+        news_dict_li.append(news.to_basic_dict())
+
+    data = {
+        "news_dict_li": news_dict_li,
+        "current_page": current_page,
+        "total_page": total_page
+    }
+
+    return jsonify(errno=RET.OK, errmsg="OK", data=data)
