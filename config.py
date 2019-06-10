@@ -4,7 +4,7 @@ from redis import StrictRedis
 
 class Config(object):
     SECRET_KEY = '123456789'
-    SQLALCHEMY_DATABASE_URI = "mysql://root:mysql:127.0.0.1:3306/information_zzpython12"
+    SQLALCHEMY_DATABASE_URI = "mysql://root:nicklogin@127.0.0.1:3306/information"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     # Define two class properties to support dynamic modification
