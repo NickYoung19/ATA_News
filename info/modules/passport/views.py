@@ -100,7 +100,7 @@ def send_sms_code():
     return jsonify(errno=RET.OK, errmsg='发送成功')
 
 
-@passport_blu.route('/register')
+@passport_blu.route('/register', methods=['POST'])
 def register():
     """
     Realized register function
@@ -134,7 +134,8 @@ def register():
     # Add the correct data to the mysql database
     user = User()
     user.nick_name = mobile
-    user.password_hash = password
+    # user.password_hash = password
+    user.password = password
     user.mobile = mobile
 
     try:
