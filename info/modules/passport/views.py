@@ -152,7 +152,7 @@ def register():
     return jsonify(errno=RET.OK, errmsg="注册成功")
 
 
-@passport_blu.route('/login')
+@passport_blu.route('/login', methods=['POST'])
 def login():
     """
     Realized user login function
