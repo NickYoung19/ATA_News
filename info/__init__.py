@@ -58,9 +58,14 @@ def create_app(config_name):
     # Integrated flask_session app
     Session(app)
 
-    # Registration blueprint
+    # Registered index blueprint
     # ps: When to use when to import, can solve the loop import issue
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
+
+    # Registered passport blueprint
+    from info.modules.passport import passport_blu
+    app.register_blueprint(passport_blu)
+
     # The factory function returns the created program instance
     return app
