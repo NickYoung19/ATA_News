@@ -50,10 +50,10 @@ def create_app(config_name):
     # quote
     global redis_store
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST, port=config[
-                              config_name].REDIS_PORT)
+                              config_name].REDIS_PORT, decode_responses=True)
 
     # CRSFProtect relate to the object app, Set csrf_token to form and cookie
-    CSRFProtect(app)
+    # CSRFProtect(app)
 
     # Integrated flask_session app
     Session(app)

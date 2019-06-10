@@ -49,6 +49,7 @@ def send_sms_code():
     """
     # Get json to dict with request json method
     params_dict = request.json
+    print('用户请求的参数: %s' % params_dict)
     # Get params from front-end
     mobile = params_dict.get('mobile')
     image_code = params_dict.get('image_code')
@@ -78,7 +79,7 @@ def send_sms_code():
 
     # Generate sms_code
     sms_code_str = '%06d' % random.randint(0, 999999)
-    current_app.logger.debug(sms_code_str)
+    current_app.logger.debug("生成的短信验证码是: %s" % sms_code_str)
 
     # Send sms_code
     result = CCP().send_template_sms(mobile, [sms_code_str, constants.SMS_CODE_REDIS_EXPIRES / 300], 1)
