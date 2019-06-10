@@ -2,7 +2,7 @@ from flask import render_template, session
 from flask import current_app
 
 from info import redis_store, constants
-from info.models import User, News
+from info.models import User, News, Category
 from info.modules.index import index_blu
 
 
@@ -37,11 +37,22 @@ def index():
     # news_list: [obj, obj, obj]   --->   [{}, {}, {}]
     news_dict_li = [news.to_basic_dict() for news in news_list]
 
+    # Function: Show news category at home page
+    categories = []
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # categories: [obj, obj, obj]   --->   [{}, {}, {}]
+    category_li = [category.to_dict() for category in categories]
+
     # Add rendering data
     data = {
         # Change user_obj to dict format
         "user_info": user.to_dict() if user else None,
-        "news_dict_li": news_dict_li
+        "news_dict_li": news_dict_li,
+        "category_li": category_li
     }
 
     # Rendering data to home page
