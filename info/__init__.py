@@ -11,6 +11,8 @@ from logging.handlers import RotatingFileHandler
 
 
 # Initialize a sqlalchemy instance object db to be associated with the app
+from info.utils.common import do_index_class
+
 db = SQLAlchemy()
 
 
@@ -68,6 +70,9 @@ def create_app(config_name):
 
     # Integrated flask_session app
     Session(app)
+
+    # Add custom filter
+    app.add_template_filter(do_index_class, "index_class")
 
     # Registered index blueprint
     # ps: When to use when to import, can solve the loop import issue

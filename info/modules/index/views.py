@@ -1,8 +1,8 @@
 from flask import render_template, session
 from flask import current_app
 
-from info import redis_store
-from info.models import User
+from info import redis_store, constants
+from info.models import User, News
 from info.modules.index import index_blu
 
 
@@ -16,7 +16,7 @@ def index():
     # redis_store.session = ['name', 'miaomiao']
     # return 'Success into Blueprint'
 
-    # if user logined and add user_info to current user home page
+    # Function: If user logined and add user_info to current user home page
     # Get the user_id from cookie
     user_id = session.get('user_id')
     user = None
@@ -27,9 +27,21 @@ def index():
         except Exception as e:
             current_app.logger.error(e)
 
+    # Function: Realizes news ranking at the right
+    news_list = []
+    try:
+        news_list = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS)
+    except Exception as e:
+        current_app.logger.error(e)
+
+    # news_list: [obj, obj, obj]   --->   [{}, {}, {}]
+    news_dict_li = [news.to_basic_dict() for news in news_list]
+
+    # Add rendering data
     data = {
         # Change user_obj to dict format
-        "user_info": user.to_dict() if user else None
+        "user_info": user.to_dict() if user else None,
+        "news_dict_li": news_dict_li
     }
 
     # Rendering data to home page
