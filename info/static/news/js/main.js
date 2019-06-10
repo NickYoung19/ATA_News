@@ -127,12 +127,17 @@ $(function(){
             type: 'post',
             data: JSON.stringify(params),
             contentType: "application/json",
+            headers: {
+                "X-CSRF_Token": getCookie("csrf_token")
+            },
             success: function (response) {
                 if (response.errno == "0") {
                     // 代表登录成功
                     location.reload()
                 }else{
-                    alert(response.errmsg)
+                    // alert(response.errmsg)
+                    $("#login-password-err").html(response.errmsg)
+                    $("#login-password-err").show()
                 }
             }
         })
@@ -180,6 +185,9 @@ $(function(){
             type: "post",
             data: JSON.stringify(params),
             contentType: "application/json",
+            headers: {
+                "X-CSRF_Token": getCookie("csrf_token")
+            },
             success: function (response) {
                 if (response.errno == "0") {
                     // 注册成功,刷新页面
@@ -241,6 +249,9 @@ function sendSMSCode() {
         data: JSON.stringify(params),
         // 指定请求参数的数据类型
         contentType: "application/json",
+        headers: {
+                "X-CSRF_Token": getCookie("csrf_token")
+            },
         success: function (response) {
             if (response.errno == "0") {
                 // 代表发送成功

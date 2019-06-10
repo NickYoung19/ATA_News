@@ -1,4 +1,6 @@
 from flask import Flask
+from flask_wtf.csrf import generate_csrf
+
 from config import config
 from flask_sqlalchemy import SQLAlchemy
 from redis import StrictRedis
@@ -53,7 +55,16 @@ def create_app(config_name):
                               config_name].REDIS_PORT, decode_responses=True)
 
     # CRSFProtect relate to the object app, Set csrf_token to form and cookie
-    # CSRFProtect(app)
+    # Improve csrf_token logic
+    # first: add the csrf_token to cookie
+    # second: add the csrf_token to ajax
+    @app.after_request
+    def after_request(response):
+        csrf_token = generate_csrf()
+        response.set_cookie('csrf_token', csrf_token)
+
+        return response
+    CSRFProtect(app)
 
     # Integrated flask_session app
     Session(app)
