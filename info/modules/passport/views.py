@@ -1,15 +1,16 @@
 import random
 import re
 
-from flask import request
+from flask import request, session
 from flask import current_app
 from flask import abort
 from flask import make_response
 from flask import jsonify
 
-from info import redis_store
+from info import redis_store, db
 from info import constants
 from info.libs.yuntongxun.sms import CCP
+from info.models import User
 from info.utils.captcha.captcha import captcha
 from info.modules.passport import passport_blu
 from info.utils.response_code import RET
@@ -30,6 +31,7 @@ def get_image_code():
     try:
         # Save image code to redis
         redis_store.set('imageCodeId_' + image_code_id, text, constants.IMAGE_CODE_REDIS_EXPIRES)
+        current_app.logger.debug('生成的图片验证码为: %s' % text)
     except Exception as e:
         current_app.logger.error(e)
         abort(500)
@@ -96,3 +98,53 @@ def send_sms_code():
 
         # 返回发送结果
     return jsonify(errno=RET.OK, errmsg='发送成功')
+
+
+@passport_blu.route('/register')
+def register():
+    """
+    Realized register function
+    :return:
+    """
+    # Receive parameters passed by the front end
+    params_dict = request.json
+    mobile = params_dict.get('mobile')
+    smscode = params_dict.get('smscode')
+    password = params_dict.get('password')
+
+    if not all([mobile, smscode, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg="参数不全")
+
+    if not re.match(r'1[356789]\d{9}', mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg="手机号格式不正确")
+
+    try:
+        # Get sms code from redis
+        real_sms_code = redis_store.get('SMS_' + mobile)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据查询失败")
+
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA, errmsg="短信验证码已过期")
+
+    if real_sms_code != smscode:
+        return jsonify(errno=RET.DATAERR, errmsg="验证码输入错误")
+
+    # Add the correct data to the mysql database
+    user = User()
+    user.nick_name = mobile
+    user.password_hash = password
+    user.mobile = mobile
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="数据保存失败")
+
+    # Save user login status
+    session['user_id'] = user.id
+    return jsonify(errno=RET.OK, errmsg="注册成功")
